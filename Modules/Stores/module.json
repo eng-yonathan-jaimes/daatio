@@ -1,0 +1,11 @@
+{
+    "name": "Stores",
+    "alias": "stores",
+    "description": "Stores, store types, and store ownership.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Stores\\app\\Providers\\StoresServiceProvider"
+    ],
+    "files": []
+}

@@ -1,0 +1,11 @@
+{
+    "name": "Clients",
+    "alias": "clients",
+    "description": "Clients, balances, orders, and client order lines.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Clients\\app\\Providers\\ClientsServiceProvider"
+    ],
+    "files": []
+}

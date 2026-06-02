@@ -1,0 +1,9 @@
+-- Import database.sql first.
+-- Then import 001_sanctum_personal_access_tokens.sql.
+--
+-- cPanel commonly prefixes database names and users.
+-- Example:
+--   DB_DATABASE=cpaneluser_daatio
+--   DB_USERNAME=cpaneluser_daatio_user
+--
+-- The Laravel app still reads the real database name from .env.

@@ -1,0 +1,11 @@
+{
+    "name": "Users",
+    "alias": "users",
+    "description": "User accounts, access, login history, and recovery history.",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Users\\app\\Providers\\UsersServiceProvider"
+    ],
+    "files": []
+}
