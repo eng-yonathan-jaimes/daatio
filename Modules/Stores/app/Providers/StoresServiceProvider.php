@@ -16,5 +16,10 @@ class StoresServiceProvider extends ServiceProvider
             ->prefix('stores')
             ->name('stores.')
             ->group(__DIR__.'/../../routes/web.php');
+
+        Route::middleware('api')
+            ->prefix('api')
+            ->name('api.')
+            ->group(__DIR__.'/../../routes/api.php');
     }
 }

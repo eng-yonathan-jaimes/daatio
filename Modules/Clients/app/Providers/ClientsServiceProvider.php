@@ -16,5 +16,10 @@ class ClientsServiceProvider extends ServiceProvider
             ->prefix('clients')
             ->name('clients.')
             ->group(__DIR__.'/../../routes/web.php');
+
+        Route::middleware('api')
+            ->prefix('api')
+            ->name('api.')
+            ->group(__DIR__.'/../../routes/api.php');
     }
 }

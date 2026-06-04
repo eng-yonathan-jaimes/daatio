@@ -16,5 +16,10 @@ class TransactionsServiceProvider extends ServiceProvider
             ->prefix('transactions')
             ->name('transactions.')
             ->group(__DIR__.'/../../routes/web.php');
+
+        Route::middleware('api')
+            ->prefix('api')
+            ->name('api.')
+            ->group(__DIR__.'/../../routes/api.php');
     }
 }
