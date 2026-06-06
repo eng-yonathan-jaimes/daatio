@@ -1,0 +1,35 @@
+Well, I will give now a description on each table and how they relate to each other and what they are expecting from the application and what they will give back to the application.
+
+The user, it has all the information, but from this we are going to take the ID and we are going to be using this in almost every table.
+
+- The user subscription
+- the user login history
+- the user recovery history 
+- the store, the transaction
+
+Those are the tables and each of these tables will record something about the user, in this case it is the tenant or the person who is managing the application. 
+
+The user_subscription is all the data about the subscription, the payment, when it starts, when it ends, what value has that subscription, what is the status of that subscription, when the trial ends, if it is a trial, and if the user canceled that, that would also be registered in that date, on that field, the cancel date, the time. 
+
+Now, we have another one that is the user login history. Every time the user logs in, we need to have a record of each entrance of the user trying to login in the application. 
+
+User recovery history, you are going to record the intent date where the user intended to recover. The recovery answer, is the answer that the application gave back if it is... A link or a code, the recovery success, if it is true or if it is false, meaning that whether he actually regained the access to the platform or he didn't regain access to the platform. 
+
+The recovery method used, and this is linked to the recovery answer. The recovery method used has to do with if it is a link or if it is an SMS message.
+
+The IP, the actual public IP of the device, the user ID, of course, it is the user who is trying to get into it, and the device, it is the device, if it was a computer, the name of the computer, the name of that device, if it is possible to take that information. 
+
+The store, well, I think you already know, it is the name of the store, if it is active, the last time it was updated this table, the address where it is placed, there must be a physical place, even though maybe online, but always there is a physical place and the registration date. 
+
+And last but not least, the transaction, as this contains different stores and different users, we need to know which user is having this transaction. What does the transaction have? It records the 
+store, 
+the client order ID, there is a client that he is making an order, and when that client is making an order, if he's selling, if he's paying, if he's retrieving, or if he's having this settled, we need to know that. 
+We need to know how much money, it is the amount of money, we need to also know the transaction state. if it is in favor, meaning that the client or the transaction has more amount of money and it is not in debt. this is always from the client's perspective. example: this is in favor when the client has money in favor of him, in debt means the client have debts to the store or to the owner of it. if it is settled, it means that the client have no debts nor money or current amount in favor. 
+For example, there is gold. He brought gold. He's selling gold to the store, but he didn't receive any payment for that gold. Let's say that the amount of value for the gold he brought is like 50,000. Then, to him, that transaction will mark in as state of transaction in favor. He has around 50,000 in favor.
+Now, let's say he came back and retrieved gold, and he's now retrieving like 70,000 of gold, but he didn't pay it, meaning that he is owing 20,000, but we also need to make this calculations to update some other fields where the full amount of debt or the full amount of money in favor is going to be record.
+And if the client retrieves exactly the amount that he has in favor, well, the transaction then was settled 50 in favor and 50 retrieved is equal to settled. This will record every movement. 
+The transaction is recording every movement that is happening with the client. Now, we have the product, this is the metal, it can be gold, silver, or whatever other kind of metal that the store is working on.
+The client list order, this is the order list of the client. That's to say maybe he is buying or selling like 50 grams of gold, 70 grams of silver, and 80 grams of some other metal. That is the basic idea.
+And all those things have to be noticed every time that the user is having registry in the web app in the front-end section of the app, like to have the option to add a list of products, in this situation, metals.
+We also have the client_state table, and in the client state is where we are going to be having the total. of money in favor, in debt, or if that client is settled. Then, if the client amount is zero, it means the state of the client is settled. If the amount is above zero, it means he has money in favor. If the amount is lower zero, it means he has debt. 
+Then the example before, I was talking about the 50 gold entering then the 70 gold coming out. There are two transactions, one of 50 in gold entering and the other one going out. Here, in the client state, the amount for this example will be the minus $20,000 because he is in debt with the store around $20,000 value in gold.

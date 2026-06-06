@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Modules\Clients\app\Models\Client;
 use Modules\Clients\app\Models\ClientOrder;
 use Modules\Stores\app\Models\Store;
+use Modules\Users\app\Models\User;
 
 class Transaction extends Model
 {
@@ -37,5 +38,10 @@ class Transaction extends Model
     public function clientOrder(): BelongsTo
     {
         return $this->belongsTo(ClientOrder::class, 'transaction_client_order_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'transaction_user_id');
     }
 }
