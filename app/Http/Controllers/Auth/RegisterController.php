@@ -36,6 +36,8 @@ class RegisterController extends Controller
             return back()->withErrors(['phone' => 'This phone number is already registered.'])->withInput();
         }
 
+        $now = now();
+
         $user = User::create([
             'tenant_id' => 1,
             'user_name' => $validated['first_name'],
@@ -44,8 +46,8 @@ class RegisterController extends Controller
             'user_phone_number' => $fullPhone,
             'user_password' => Hash::make($validated['password']),
             'user_access' => 'user',
-            'user_creation' => now(),
-            'user_update_date' => now(),
+            'user_creation' => $now,
+            'user_update_date' => $now,
         ]);
 
         $user->generateEmailVerificationCode();
@@ -59,11 +61,11 @@ class RegisterController extends Controller
             UserSubscription::create([
                 'user_subscription_user_id' => $user->id,
                 'user_subscription_subscription_id' => $trialPlan->id,
-                'user_subscription_start_date' => now(),
-                'user_subscription_end_date' => now()->addDays($trialPlan->subscription_days),
+                'user_subscription_start_date' => $now,
+                'user_subscription_end_date' => $now->copy()->addDays($trialPlan->subscription_days),
                 'user_subscription_value' => $trialPlan->subscription_value,
                 'user_subscription_status' => 'Active',
-                'user_subscription_trial_ends_date' => now()->addDays($trialPlan->subscription_days),
+                'user_subscription_trial_ends_date' => $now->copy()->addDays($trialPlan->subscription_days),
             ]);
         }
 
@@ -71,14 +73,15 @@ class RegisterController extends Controller
             'store_user_id' => $user->id,
             'store_name' => $validated['first_name'] . "'s Store",
             'store_active' => true,
-            'store_update_date' => now(),
+            'store_update_date' => $now,
             'store_address' => '',
             'store_type_id' => 1,
             'store_location' => 'Physical',
-            'store_registration_date' => now(),
+            'store_registration_date' => $now,
         ]);
 
         auth()->login($user);
+        $request->session()->regenerate();
 
         return redirect()->route('verification.notice');
     }

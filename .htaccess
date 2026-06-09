@@ -1,0 +1,4 @@
+# Block access to sensitive files
+<FilesMatch "^(\.env|setup\.php)$">
+    Require all denied
+</FilesMatch>

@@ -1,15 +1,15 @@
-<?php $__env->startSection('title', 'Customers'); ?>
+<?php $__env->startSection('title', __('messages.customers')); ?>
 
 <?php $__env->startSection('main'); ?>
 <div class="page-header">
     <div style="display:flex;justify-content:space-between;align-items:center;">
         <div>
-            <h1>Customers</h1>
-            <p>Manage your customer records</p>
+            <h1><?php echo e(__('messages.customers')); ?></h1>
+            <p><?php echo e(__('messages.manage_customers')); ?></p>
         </div>
         <div style="display:flex;gap:0.5rem;">
-            <a href="<?php echo e(route('print.customers')); ?>" target="_blank" class="btn btn-outline">Print</a>
-            <a href="<?php echo e(route('customers.create')); ?>" class="btn btn-primary">+ New Customer</a>
+            <a href="<?php echo e(route('print.customers')); ?>" target="_blank" class="btn btn-outline"><?php echo e(__('messages.print')); ?></a>
+            <a href="<?php echo e(route('customers.create')); ?>" class="btn btn-primary"><?php echo e(__('messages.new_customer')); ?></a>
         </div>
     </div>
 </div>
@@ -21,10 +21,10 @@
 <div class="card" style="margin-bottom:1.5rem;">
     <form method="GET" action="<?php echo e(route('customers.index')); ?>">
         <div style="display:flex;gap:0.5rem;">
-            <input type="text" name="search" value="<?php echo e($search); ?>" placeholder="Search by name or phone..." style="flex:1;padding:0.625rem 0.75rem;border:1px solid var(--color-border);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;">
-            <button type="submit" class="btn btn-outline">Search</button>
+            <input type="text" name="search" value="<?php echo e($search); ?>" placeholder="<?php echo e(__('messages.search_by_name_or_phone')); ?>" style="flex:1;padding:0.625rem 0.75rem;border:1px solid var(--color-border);border-radius:8px;font-family:var(--font-body);font-size:0.9rem;">
+            <button type="submit" class="btn btn-outline"><?php echo e(__('messages.search')); ?></button>
             <?php if($search): ?>
-                <a href="<?php echo e(route('customers.index')); ?>" class="btn btn-outline">Clear</a>
+                <a href="<?php echo e(route('customers.index')); ?>" class="btn btn-outline"><?php echo e(__('messages.clear')); ?></a>
             <?php endif; ?>
         </div>
     </form>
@@ -35,9 +35,9 @@
         <table>
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Phone</th>
-                    <th>Registration Date</th>
+                    <th><?php echo e(__('messages.name')); ?></th>
+                    <th><?php echo e(__('messages.phone')); ?></th>
+                    <th><?php echo e(__('messages.registration_date')); ?></th>
                     <th></th>
                 </tr>
             </thead>
@@ -48,16 +48,17 @@
                         <td><?php echo e($customer->client_phone_number); ?></td>
                         <td><?php echo e($customer->client_registration_date->format('M d, Y')); ?></td>
                         <td style="text-align:right;">
-                            <a href="<?php echo e(route('customers.show', $customer->id)); ?>" class="btn btn-outline" style="padding:0.375rem 0.75rem;font-size:0.8rem;">View</a>
+                            <a href="<?php echo e(route('customers.show', $customer->id)); ?>" class="btn btn-outline" style="padding:0.375rem 0.75rem;font-size:0.8rem;"><?php echo e(__('messages.view')); ?></a>
                         </td>
                     </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                     <tr>
                         <td colspan="4" style="text-align:center;color:var(--color-text-muted);padding:2rem;">
                             <?php if($search): ?>
-                                No customers found matching "<?php echo e($search); ?>".
+                                <?php echo e(__('messages.no_customers_found', ['search' => $search])); ?>
+
                             <?php else: ?>
-                                No customers yet. <a href="<?php echo e(route('customers.create')); ?>">Create your first customer</a>.
+                                <?php echo e(__('messages.no_customers_yet')); ?> <a href="<?php echo e(route('customers.create')); ?>"><?php echo e(__('messages.create_first_customer')); ?></a>.
                             <?php endif; ?>
                         </td>
                     </tr>

@@ -4,43 +4,43 @@
 <nav class="navbar">
     <a href="/daatio/public/" class="navbar-brand">Daatio</a>
     <div class="navbar-menu">
-        <a href="/daatio/public/" class="active">Home</a>
-        <a href="#">Features</a>
-        <a href="#">Pricing</a>
-        <a href="#">About</a>
+        <a href="/daatio/public/" class="active">{{ __('messages.home') }}</a>
+        <a href="#">{{ __('messages.features') }}</a>
+        <a href="#">{{ __('messages.pricing') }}</a>
+        <a href="#">{{ __('messages.about') }}</a>
     </div>
     <div class="navbar-actions">
-        <a href="/daatio/public/login" class="btn btn-outline">Sign in</a>
-        <a href="/daatio/public/register" class="btn btn-primary">Get Started</a>
+        <a href="/daatio/public/login" class="btn btn-outline">{{ __('messages.sign_in') }}</a>
+        <a href="/daatio/public/register" class="btn btn-primary">{{ __('messages.get_started_free') }}</a>
     </div>
 </nav>
 
 <div class="main-content" style="padding: 0; display: block;">
     <div class="landing-hero">
-        <h1>Simplify Your Business, Elevate Your Success</h1>
-        <p>Daatio helps small businesses manage finances, track customers, and generate insights — all in one intuitive platform.</p>
-        <a href="/daatio/public/register" class="btn btn-primary">Get Started Free</a>
+        <h1>{{ __('messages.welcome_title') }}</h1>
+        <p>{{ __('messages.welcome_subtitle') }}</p>
+        <a href="/daatio/public/register" class="btn btn-primary">{{ __('messages.get_started_free') }}</a>
 
         <div class="features-grid">
             <div class="feature-card">
                 <div class="feature-icon">◉</div>
-                <h3>Dashboard</h3>
-                <p>Real-time overview of your business performance at a glance.</p>
+                <h3>{{ __('messages.feature_dashboard') }}</h3>
+                <p>{{ __('messages.feature_dashboard_desc') }}</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">◎</div>
-                <h3>Cashbook</h3>
-                <p>Track every transaction with easy-to-use cash management tools.</p>
+                <h3>{{ __('messages.feature_cashbook') }}</h3>
+                <p>{{ __('messages.feature_cashbook_desc') }}</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">◐</div>
-                <h3>Customers</h3>
-                <p>Manage customer relationships and track payment history.</p>
+                <h3>{{ __('messages.feature_customers') }}</h3>
+                <p>{{ __('messages.feature_customers_desc') }}</p>
             </div>
             <div class="feature-card">
                 <div class="feature-icon">◑</div>
-                <h3>Suppliers</h3>
-                <p>Keep your supplier information organized and accessible.</p>
+                <h3>{{ __('messages.feature_suppliers') }}</h3>
+                <p>{{ __('messages.feature_suppliers_desc') }}</p>
             </div>
         </div>
     </div>

@@ -82,8 +82,6 @@ class AuthController extends Controller
 
         if ($accessToken) {
             $accessToken->delete();
-        } elseif ($token = $request->bearerToken()) {
-            PersonalAccessToken::findToken($token)?->delete();
         }
 
         return response()->json([

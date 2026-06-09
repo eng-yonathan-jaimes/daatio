@@ -10,11 +10,14 @@ use Modules\Stores\app\Models\Store;
 
 class ProductsController extends Controller
 {
+    private function userStoreIds()
+    {
+        return Store::where('store_user_id', Auth::id())->pluck('id');
+    }
+
     public function index()
     {
-        $storeIds = Store::where('store_user_id', Auth::id())->pluck('id');
-
-        $products = Product::whereIn('product_store_id', $storeIds)
+        $products = Product::whereIn('product_store_id', $this->userStoreIds())
             ->orderBy('product_name')
             ->get();
 
@@ -56,16 +59,14 @@ class ProductsController extends Controller
 
     public function edit($id)
     {
-        $storeIds = Store::where('store_user_id', Auth::id())->pluck('id');
-        $product = Product::whereIn('product_store_id', $storeIds)->findOrFail($id);
+        $product = Product::whereIn('product_store_id', $this->userStoreIds())->findOrFail($id);
 
         return view('products.edit', compact('product'));
     }
 
     public function update(Request $request, $id)
     {
-        $storeIds = Store::where('store_user_id', Auth::id())->pluck('id');
-        $product = Product::whereIn('product_store_id', $storeIds)->findOrFail($id);
+        $product = Product::whereIn('product_store_id', $this->userStoreIds())->findOrFail($id);
 
         $validated = $request->validate([
             'product_name' => ['required', 'string', 'max:255'],
@@ -89,8 +90,7 @@ class ProductsController extends Controller
 
     public function destroy($id)
     {
-        $storeIds = Store::where('store_user_id', Auth::id())->pluck('id');
-        $product = Product::whereIn('product_store_id', $storeIds)->findOrFail($id);
+        $product = Product::whereIn('product_store_id', $this->userStoreIds())->findOrFail($id);
         $product->delete();
 
         return redirect()->route('products.index')

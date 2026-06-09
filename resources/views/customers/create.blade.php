@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'New Customer')
+@section('title', __('messages.new_customer'))
 
 @php
 $countryCodes = [
@@ -27,33 +27,31 @@ $countryCodes = [
 
 @section('main')
 <div class="page-header">
-    <h1>New Customer</h1>
-    <p>Register a new customer record</p>
+    <h1>{{ __('messages.new_customer') }}</h1>
+    <p>{{ __('messages.register_customer') }}</p>
 </div>
 
 @if($errors->any())
-    <div class="alert alert-error">
-        {{ $errors->first() }}
-    </div>
+    <div class="alert alert-error">{{ $errors->first() }}</div>
 @endif
 
 <div class="card" style="max-width:560px;">
-    <form method="POST" action="{{ route('customers.store') }}" onsubmit="return confirm('Save this customer?')">
+    <form method="POST" action="{{ route('customers.store') }}" onsubmit="return confirm('{{ __('messages.save_customer_confirm') }}')">
         @csrf
 
         <div style="display:flex;gap:0.75rem;">
             <div class="form-group" style="flex:1;">
-                <label for="first_name">First Name <span style="color:#DC2626;">*</span></label>
+                <label for="first_name">{{ __('messages.first_name') }} <span style="color:#DC2626;">*</span></label>
                 <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" placeholder="John" required autofocus>
             </div>
             <div class="form-group" style="flex:1;">
-                <label for="last_name">Last Name <span style="color:#DC2626;">*</span></label>
+                <label for="last_name">{{ __('messages.last_name') }} <span style="color:#DC2626;">*</span></label>
                 <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" placeholder="Doe" required>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="phone">Phone Number <span style="color:#DC2626;">*</span></label>
+            <label for="phone">{{ __('messages.phone_number') }} <span style="color:#DC2626;">*</span></label>
             <div class="phone-group">
                 <select name="country_code" id="country_code" class="country-select">
                     @foreach($countryCodes as $c)
@@ -65,12 +63,12 @@ $countryCodes = [
         </div>
 
         <div class="form-group">
-            <label for="email">Email</label>
+            <label for="email">{{ __('messages.email_address') }}</label>
             <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="customer@example.com">
         </div>
 
         <div class="form-group">
-            <label for="document_type">Document Type</label>
+            <label for="document_type">{{ __('messages.document') }}</label>
             <select id="document_type" name="document_type" class="country-select" style="width:100%;">
                 <option value="Cedula" {{ old('document_type') == 'Cedula' ? 'selected' : '' }}>Cedula</option>
                 <option value="Passport" {{ old('document_type') == 'Passport' ? 'selected' : '' }}>Passport</option>
@@ -79,13 +77,13 @@ $countryCodes = [
         </div>
 
         <div class="form-group">
-            <label for="document_number">Document Number</label>
+            <label for="document_number">{{ __('messages.document') }} #</label>
             <input type="text" id="document_number" name="document_number" value="{{ old('document_number') }}" placeholder="ID number">
         </div>
 
         <div style="display:flex;gap:1rem;margin-top:1.5rem;">
-            <button type="submit" class="btn btn-primary">Save Customer</button>
-            <a href="{{ route('customers.index') }}" class="btn btn-outline" onclick="return confirm('Discard changes?')">Cancel</a>
+            <button type="submit" class="btn btn-primary">{{ __('messages.save_customer') }}</button>
+            <a href="{{ route('customers.index') }}" class="btn btn-outline" onclick="return confirm('{{ __('messages.discard_changes') }}')">{{ __('messages.cancel') }}</a>
         </div>
     </form>
 </div>

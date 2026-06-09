@@ -12,9 +12,18 @@ class PrintController extends Controller
 {
     public function customerHistory($id)
     {
-        $client = Client::with(['transactions' => function ($q) {
-            $q->with('user')->orderBy('transaction_registration_date', 'desc');
-        }, 'states'])->findOrFail($id);
+        $user = Auth::user();
+        $storeIds = Store::where('store_user_id', $user->id)->pluck('id');
+
+        $client = Client::whereHas('states', function ($q) use ($storeIds) {
+            $q->whereIn('client_state_store_id', $storeIds);
+        })->with(['transactions' => function ($q) use ($storeIds) {
+            $q->whereIn('transaction_store_id', $storeIds)
+              ->with('user')
+              ->orderBy('transaction_registration_date', 'desc');
+        }, 'states' => function ($q) use ($storeIds) {
+            $q->whereIn('client_state_store_id', $storeIds);
+        }])->findOrFail($id);
 
         $balance = $client->states->first();
 
@@ -40,10 +49,17 @@ class PrintController extends Controller
     public function customerList(Request $request)
     {
         $search = $request->input('search');
+        $user = Auth::user();
+        $storeIds = Store::where('store_user_id', $user->id)->pluck('id');
 
         $customers = Client::query()
             ->where('client_active', true)
-            ->with('states');
+            ->whereHas('states', function ($q) use ($storeIds) {
+                $q->whereIn('client_state_store_id', $storeIds);
+            })
+            ->with(['states' => function ($q) use ($storeIds) {
+                $q->whereIn('client_state_store_id', $storeIds);
+            }]);
 
         if ($search) {
             $customers->where(function ($q) use ($search) {

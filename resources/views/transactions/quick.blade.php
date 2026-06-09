@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'New Transaction')
+@section('title', __('messages.new_transaction_title'))
 
 @php
 $clients = \Modules\Clients\app\Models\Client::where('client_active', true)
@@ -25,12 +25,20 @@ $products = \Modules\Products\app\Models\Product::orderBy('product_name')
 
 @section('main')
 <div class="page-header">
-    <h1>New Transaction</h1>
-    <p>Record a buy or sell operation with line items</p>
+    <h1>{{ __('messages.new_transaction_title') }}</h1>
+    <p>{{ __('messages.new_transaction_desc') }}</p>
 </div>
 
 @if($errors->any())
-    <div class="alert alert-error">{{ $errors->first() }}</div>
+    <div class="alert alert-error">{{ $errors->first() }}
+    @if($errors->has('items') && is_array($errors->get('items')))
+        @foreach($errors->get('items') as $itemErrors)
+            @if(is_array($itemErrors))
+                @foreach($itemErrors as $e) <br>{{ $e }} @endforeach
+            @endif
+        @endforeach
+    @endif
+    </div>
 @endif
 
 <form method="POST" action="{{ route('transactions.quick.store') }}" id="tx-form">
@@ -39,47 +47,47 @@ $products = \Modules\Products\app\Models\Product::orderBy('product_name')
     <div class="card" style="margin-bottom:1.5rem;max-width:700px;">
         <div style="display:flex;gap:1.5rem;align-items:end;">
             <div class="form-group" style="flex:1;margin-bottom:0;position:relative;">
-                <label for="client-search">Client <span style="color:#DC2626;">*</span></label>
-                <input type="text" id="client-search" autocomplete="off" placeholder="Type name, phone, or ID..." style="width:100%;">
+                <label for="client-search">{{ __('messages.client') }} <span style="color:#DC2626;">*</span></label>
+                <input type="text" id="client-search" autocomplete="off" placeholder="{{ __('messages.type_name_phone') }}" style="width:100%;">
                 <input type="hidden" name="client_id" id="client-id" value="{{ old('client_id') }}">
                 <div class="search-dropdown" id="client-dropdown"></div>
             </div>
             <div class="form-group" style="flex:1;margin-bottom:0;">
-                <label for="direction">Direction <span style="color:#DC2626;">*</span></label>
+                <label for="direction">{{ __('messages.direction') }} <span style="color:#DC2626;">*</span></label>
                 <select id="direction" name="direction" required style="width:100%;padding:0.75rem 1rem;border:1px solid var(--color-border);border-radius:8px;font-size:1rem;font-family:var(--font-body);color:var(--color-text);background:var(--color-card);">
-                    <option value="">— Select —</option>
-                    <option value="buying" {{ old('direction') == 'buying' ? 'selected' : '' }}>I'm buying from the client</option>
-                    <option value="selling" {{ old('direction') == 'selling' ? 'selected' : '' }}>I'm selling to the client</option>
+                    <option value="">{{ __('messages.select_direction') }}</option>
+                    <option value="buying" {{ old('direction') == 'buying' ? 'selected' : '' }}>{{ __('messages.buying_from_client') }}</option>
+                    <option value="selling" {{ old('direction') == 'selling' ? 'selected' : '' }}>{{ __('messages.selling_to_client') }}</option>
                 </select>
             </div>
         </div>
     </div>
 
     <div class="card" style="margin-bottom:1.5rem;max-width:700px;">
-        <div class="card-title" style="margin-bottom:1rem;">Line Items</div>
+        <div class="card-title" style="margin-bottom:1rem;">{{ __('messages.line_items') }}</div>
         <div class="form-group" style="position:relative;">
-            <label for="product-search">Add product</label>
-            <input type="text" id="product-search" autocomplete="off" placeholder="Type product name..." style="width:100%;">
+            <label for="product-search">{{ __('messages.add_product') }}</label>
+            <input type="text" id="product-search" autocomplete="off" placeholder="{{ __('messages.type_product_name') }}" style="width:100%;">
             <div class="search-dropdown" id="product-dropdown"></div>
         </div>
 
         <table id="items-table" style="margin-top:1rem;display:none;width:100%;">
             <thead>
                 <tr>
-                    <th>Product</th>
-                    <th style="width:130px;">Weight (g)</th>
-                    <th style="width:80px;">In Stock</th>
+                    <th>{{ __('messages.product_name') }}</th>
+                    <th style="width:130px;">{{ __('messages.weight_label') }}</th>
+                    <th style="width:80px;">{{ __('messages.in_stock_label') }}</th>
                     <th style="width:40px;"></th>
                 </tr>
             </thead>
             <tbody id="items-body"></tbody>
         </table>
-        <div id="items-empty" style="text-align:center;color:var(--color-text-muted);padding:1rem;">No items added yet. Search for a product above.</div>
+        <div id="items-empty" style="text-align:center;color:var(--color-text-muted);padding:1rem;">{{ __('messages.no_items_added') }}</div>
     </div>
 
     <div class="card" style="max-width:700px;margin-bottom:1.5rem;">
         <div class="form-group" style="margin-bottom:0;">
-            <label for="total_value_display">Total Value <span style="color:#DC2626;">*</span></label>
+            <label for="total_value_display">{{ __('messages.total_value') }} <span style="color:#DC2626;">*</span></label>
             <input type="text" id="total_value_display" value="{{ old('total_value') }}" placeholder="0" required style="max-width:300px;font-family:var(--font-mono);">
             <input type="hidden" name="total_value" id="total_value" value="{{ old('total_value') }}">
         </div>
@@ -87,30 +95,41 @@ $products = \Modules\Products\app\Models\Product::orderBy('product_name')
 
     <div class="card" style="max-width:700px;">
         <div class="form-group">
-            <label for="amount_paid_display">Amount Paid Now</label>
+            <label for="amount_paid_display">{{ __('messages.amount_paid_now') }}</label>
             <div style="display:flex;gap:0.5rem;align-items:end;">
                 <input type="text" id="amount_paid_display" value="{{ old('amount_paid', '0') }}" placeholder="0" style="max-width:200px;font-family:var(--font-mono);">
-                <button type="button" class="btn btn-outline" style="font-size:0.8rem;padding:0.5rem 0.75rem;" onclick="settleFull()">Pay Total</button>
+                <button type="button" class="btn btn-outline" style="font-size:0.8rem;padding:0.5rem 0.75rem;" onclick="settleFull()">{{ __('messages.pay_total') }}</button>
             </div>
             <input type="hidden" name="amount_paid" id="amount_paid" value="{{ old('amount_paid', '0') }}">
-            <div style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.25rem;">Leave at 0 if nothing was paid / delivered right now</div>
+            <div style="font-size:0.8rem;color:var(--color-text-muted);margin-top:0.25rem;">{{ __('messages.amount_paid_hint') }}</div>
         </div>
 
         <div id="balance-summary" style="background:var(--color-active-nav-bg);border-radius:8px;padding:1rem;margin-top:0.5rem;display:none;">
-            <div style="font-size:0.85rem;color:var(--color-text-muted);margin-bottom:0.25rem;">Summary</div>
+            <div style="font-size:0.85rem;color:var(--color-text-muted);margin-bottom:0.25rem;">{{ __('messages.summary') }}</div>
             <div id="summary-text" style="font-weight:600;"></div>
         </div>
 
         <div style="margin-top:1rem;">
-            <button type="submit" class="btn btn-primary" style="font-size:1rem;padding:0.75rem 2rem;">Record Transaction</button>
+            <button type="submit" class="btn btn-primary" style="font-size:1rem;padding:0.75rem 2rem;">{{ __('messages.record_transaction') }}</button>
         </div>
     </div>
 </form>
 
 <script>
-const clients = {!! json_encode($clients) !!};
-const products = {!! json_encode($products) !!};
+const clients = @json($clients);
+const products = @json($products);
 let itemIndex = 0;
+const LANG = {
+    settled: @json(__('messages.desc_settled')),
+    youOwe: @json(__('messages.you_owe_client')),
+    clientOwes: @json(__('messages.client_owes_you')),
+    favor: @json(__('messages.favor')),
+    debit: @json(__('messages.debit')),
+    paidOf: @json(' ' . __('messages.of', [], 'es') !== 'of' ? ' de ' : ' of '),
+    selectClient: @json(__('messages.select_client_alert')),
+    notEnoughStock: @json(__('messages.not_enough_stock_alert')),
+    out: 'OUT'
+};
 
 function setupSearch(inputId, dropdownId, items, renderItem, onSelect) {
     const input = document.getElementById(inputId);
@@ -212,11 +231,11 @@ function formatCurrency(input, hidden) {
 // Form submit validation
 document.getElementById('tx-form').addEventListener('submit', function(e) {
     const direction = document.getElementById('direction').value;
-    if (!document.getElementById('client-id').value) {
-        e.preventDefault();
-        alert('Please select a client.');
-        return;
-    }
+        if (!document.getElementById('client-id').value) {
+            e.preventDefault();
+            alert(LANG.selectClient);
+            return;
+        }
     if (direction === 'selling') {
         const rows = document.querySelectorAll('#items-body tr');
         for (const row of rows) {
@@ -227,7 +246,7 @@ document.getElementById('tx-form').addEventListener('submit', function(e) {
             const stock = stockCell === 'OUT' ? 0 : (parseFloat(stockCell.replace('g','')) || 0);
             if (weight > stock) {
                 e.preventDefault();
-                alert('Not enough stock for ' + productName + '. Available: ' + stock.toFixed(4) + 'g.');
+                alert(LANG.notEnoughStock.replace(':name', productName).replace(':available', stock.toFixed(4)+'g'));
                 weightInput.focus();
                 return;
             }
@@ -265,11 +284,11 @@ function updateSummary() {
 
     box.style.display = 'block';
     if (remaining === 0) {
-        text.innerHTML = '<span style="color:#059669;">Settled</span> — fully paid, no balance remaining.';
+        text.innerHTML = '<span style="color:#059669;">' + LANG.settled + '</span> — ' + '{{ __('messages.settled_summary') }}';
     } else if (dir === 'buying') {
-        text.innerHTML = '<span style="color:var(--color-primary);">You owe the client</span> $' + remaining.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' (Favor). Paid: $' + paid.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' of $' + total.toLocaleString('en-US', {minimumFractionDigits: 2}) + '.';
+        text.innerHTML = '<span style="color:var(--color-primary);">' + LANG.youOwe + '</span> $' + remaining.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' (' + LANG.favor + '). $' + paid.toLocaleString('en-US', {minimumFractionDigits: 2}) + LANG.paidOf + '$' + total.toLocaleString('en-US', {minimumFractionDigits: 2}) + '.';
     } else {
-        text.innerHTML = '<span style="color:#DC2626;">Client owes you</span> $' + remaining.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' (Debit). Paid: $' + paid.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' of $' + total.toLocaleString('en-US', {minimumFractionDigits: 2}) + '.';
+        text.innerHTML = '<span style="color:#DC2626;">' + LANG.clientOwes + '</span> $' + remaining.toLocaleString('en-US', {minimumFractionDigits: 2}) + ' (' + LANG.debit + '). $' + paid.toLocaleString('en-US', {minimumFractionDigits: 2}) + LANG.paidOf + '$' + total.toLocaleString('en-US', {minimumFractionDigits: 2}) + '.';
     }
 }
 

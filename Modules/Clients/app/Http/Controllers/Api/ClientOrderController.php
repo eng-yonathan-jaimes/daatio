@@ -3,60 +3,45 @@
 namespace Modules\Clients\app\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Clients\app\Models\ClientOrder;
 
 class ClientOrderController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        $orders = ClientOrder::with(['client', 'store'])->paginate($request->query('per_page', 15));
-
-        return response()->json($orders);
+        return ClientOrder::with('items.product')
+            ->orderBy('client_order_registration_date', 'desc')
+            ->paginate($request->query('per_page', 25));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
-        $data = $request->validate([
-            'client_order_client_id' => ['required', 'integer', 'min:1'],
-            'client_order_store_id' => ['required', 'integer', 'min:1'],
+        $validated = $request->validate([
+            'client_order_client_id' => ['required', 'exists:client,id'],
+            'client_order_store_id' => ['required', 'exists:store,id'],
             'client_order_value' => ['required', 'numeric', 'min:0'],
-            'client_order_state' => ['required', 'string', 'in:Favor,Debit,Settled'],
-            'client_order_date_due' => ['sometimes', 'date'],
+            'client_order_state' => ['required', 'string'],
         ]);
-
-        $data['client_order_registration_date'] = now();
-
-        $order = ClientOrder::create($data);
-
-        return response()->json(['data' => $order->load(['client', 'store'])], 201);
+        $validated['client_order_registration_date'] = now();
+        $validated['client_order_date_due'] = now();
+        return ClientOrder::create($validated);
     }
 
-    public function show(ClientOrder $clientOrder): JsonResponse
+    public function show(ClientOrder $order)
     {
-        return response()->json(['data' => $clientOrder->load(['client', 'store', 'items', 'transactions'])]);
+        return $order->load('items.product');
     }
 
-    public function update(Request $request, ClientOrder $clientOrder): JsonResponse
+    public function update(Request $request, ClientOrder $order)
     {
-        $data = $request->validate([
-            'client_order_client_id' => ['sometimes', 'integer', 'min:1'],
-            'client_order_store_id' => ['sometimes', 'integer', 'min:1'],
-            'client_order_value' => ['sometimes', 'numeric', 'min:0'],
-            'client_order_state' => ['sometimes', 'string', 'in:Favor,Debit,Settled'],
-            'client_order_date_due' => ['sometimes', 'date'],
-        ]);
-
-        $clientOrder->update($data);
-
-        return response()->json(['data' => $clientOrder->load(['client', 'store'])]);
+        $order->update($request->all());
+        return $order;
     }
 
-    public function destroy(ClientOrder $clientOrder): JsonResponse
+    public function destroy(ClientOrder $order)
     {
-        $clientOrder->delete();
-
-        return response()->json(['message' => 'Client order deleted successfully.']);
+        $order->delete();
+        return response()->noContent();
     }
 }

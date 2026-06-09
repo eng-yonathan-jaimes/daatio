@@ -1,6 +1,6 @@
 @extends('auth.layout')
 
-@section('title', 'Sign Up')
+@section('title', __('messages.sign_up'))
 
 @php
 $countryCodes = [
@@ -26,18 +26,16 @@ $countryCodes = [
 @endphp
 
 @section('content')
-<a href="/daatio/public/" class="back-link">← Back to home</a>
+<a href="/daatio/public/" class="back-link">{{ __('messages.back_to_home') }}</a>
 
 <div class="auth-header">
     <a href="/daatio/public/" class="logo">Daatio</a>
-    <h1>Create an account</h1>
-    <p>Start managing your finances today</p>
+    <h1>{{ __('messages.create_account') }}</h1>
+    <p>{{ __('messages.start_managing') }}</p>
 </div>
 
 @if($errors->any())
-    <div class="alert alert-error">
-        {{ $errors->first() }}
-    </div>
+    <div class="alert alert-error">{{ $errors->first() }}</div>
 @endif
 
 <form method="POST" action="{{ route('register') }}">
@@ -45,22 +43,22 @@ $countryCodes = [
 
     <div style="display:flex;gap:0.75rem;">
         <div class="form-group" style="flex:1;">
-            <label for="first_name">First Name</label>
+            <label for="first_name">{{ __('messages.first_name') }}</label>
             <input type="text" id="first_name" name="first_name" value="{{ old('first_name') }}" placeholder="John" required autofocus>
         </div>
         <div class="form-group" style="flex:1;">
-            <label for="last_name">Last Name</label>
+            <label for="last_name">{{ __('messages.last_name') }}</label>
             <input type="text" id="last_name" name="last_name" value="{{ old('last_name') }}" placeholder="Doe" required>
         </div>
     </div>
 
     <div class="form-group">
-        <label for="email">Email address</label>
+        <label for="email">{{ __('messages.email_address') }}</label>
         <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="you@example.com" required>
     </div>
 
     <div class="form-group">
-        <label for="phone">Phone number</label>
+        <label for="phone">{{ __('messages.phone_number') }}</label>
         <div class="phone-group">
             <select name="country_code" id="country_code" class="country-select">
                 @foreach($countryCodes as $c)
@@ -72,21 +70,21 @@ $countryCodes = [
     </div>
 
     <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Create a strong password" required minlength="8">
+        <label for="password">{{ __('messages.password') }}</label>
+        <input type="password" id="password" name="password" placeholder="{{ __('messages.create_strong_password') }}" required minlength="8">
     </div>
 
     <div class="form-group">
-        <label for="password_confirmation">Confirm password</label>
-        <input type="password" id="password_confirmation" name="password_confirmation" placeholder="Repeat your password" required>
+        <label for="password_confirmation">{{ __('messages.confirm_password') }}</label>
+        <input type="password" id="password_confirmation" name="password_confirmation" placeholder="{{ __('messages.repeat_password') }}" required>
     </div>
 
-    <button type="submit" class="btn btn-primary">Create account</button>
+    <button type="submit" class="btn btn-primary">{{ __('messages.create_account') }}</button>
 </form>
 
-<div class="auth-divider">or</div>
+<div class="auth-divider">{{ __('messages.or') }}</div>
 
 <div class="auth-footer">
-    Already have an account? <a href="{{ route('login') }}">Sign in</a>
+    {{ __('messages.already_have_account') }} <a href="{{ route('login') }}">{{ __('messages.sign_in') }}</a>
 </div>
 @endsection

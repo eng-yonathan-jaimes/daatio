@@ -19,19 +19,24 @@ class DashboardController extends Controller
             ->where('store_active', true)
             ->pluck('id');
 
-        $totalCustomers = Client::where('client_active', true)->count();
+        $totalCustomers = Client::where('client_active', true)
+            ->whereHas('states', function ($q) use ($storeIds) {
+                $q->whereIn('client_state_store_id', $storeIds);
+            })->count();
 
-        $debtState = ClientState::whereIn('client_state_store_id', $storeIds)
-            ->where('client_state_state', 'Debit')
-            ->get();
+        // Single grouped query instead of two separate queries + PHP sum
+        $stateSums = ClientState::whereIn('client_state_store_id', $storeIds)
+            ->whereIn('client_state_state', ['Debit', 'Favor'])
+            ->selectRaw("
+                client_state_state,
+                SUM(client_state_amount) as total_amount
+            ")
+            ->groupBy('client_state_state')
+            ->pluck('total_amount', 'client_state_state');
 
-        $totalDebt = $debtState->sum(function ($s) {
-            return abs($s->client_state_amount);
-        });
-
-        $totalFavor = ClientState::whereIn('client_state_store_id', $storeIds)
-            ->where('client_state_state', 'Favor')
-            ->sum('client_state_amount');
+        // Debit amounts are negative; abs to get positive debt total
+        $totalDebt = abs($stateSums['Debit'] ?? 0);
+        $totalFavor = (float)($stateSums['Favor'] ?? 0);
 
         $totalPaid = Transaction::whereIn('transaction_store_id', $storeIds)
             ->where('transaction_transaction', 'Paying')

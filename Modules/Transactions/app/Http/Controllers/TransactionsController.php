@@ -51,10 +51,15 @@ class TransactionsController extends Controller
 
     public function create(Request $request, $customerId)
     {
-        $client = Client::findOrFail($customerId);
+        $user = Auth::user();
+        $storeIds = Store::where('store_user_id', $user->id)->pluck('id');
+
+        $client = Client::whereHas('states', function ($q) use ($storeIds) {
+            $q->whereIn('client_state_store_id', $storeIds);
+        })->findOrFail($customerId);
+
         $type = $request->input('type', 'Selling');
 
-        $user = Auth::user();
         $store = Store::where('store_user_id', $user->id)
             ->where('store_active', true)
             ->first();
@@ -90,7 +95,12 @@ class TransactionsController extends Controller
             'items' => ['nullable', 'array'],
         ]);
 
-        $client = Client::findOrFail($validated['client_id']);
+        $storeIds = Store::where('store_user_id', $user->id)->pluck('id');
+
+        $client = Client::whereHas('states', function ($q) use ($storeIds) {
+            $q->whereIn('client_state_store_id', $storeIds);
+        })->findOrFail($validated['client_id']);
+
         $totalValue = $validated['total_value'];
         $amountPaid = $validated['amount_paid'] ?? 0;
 
@@ -120,18 +130,37 @@ class TransactionsController extends Controller
             $txType = 'Buying';
         }
 
-        // Validate stock for selling direction
+        // Single batch fetch of ALL products referenced by this order
+        $productIds = collect($validated['items'] ?? [])
+            ->pluck('product_id')
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $products = [];
+        if ($productIds) {
+            $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
+        }
+
+        // Validate stock for selling direction using cached products (0 queries)
         if ($validated['direction'] === 'selling' && !empty($validated['items'])) {
-            foreach ($validated['items'] as $i => $item) {
+            $weightByProduct = [];
+            foreach ($validated['items'] as $item) {
                 if (empty($item['product_id']) || empty($item['weight'])) continue;
                 if ($item['weight'] <= 0) continue;
+                $pid = $item['product_id'];
+                $weightByProduct[$pid] = ($weightByProduct[$pid] ?? 0) + (float)$item['weight'];
+            }
 
-                $product = Product::find($item['product_id']);
-                if (!$product || $item['weight'] > $product->product_weight) {
+            foreach ($weightByProduct as $pid => $totalWeight) {
+                $product = $products[$pid] ?? null;
+                if (!$product || $totalWeight > $product->product_weight) {
                     $name = $product ? $product->product_name : 'Unknown';
                     $avail = $product ? rtrim(rtrim(number_format($product->product_weight, 4), '0'), '.') : 0;
+                    $idx = collect($validated['items'])->search(fn($it) => ($it['product_id'] ?? null) == $pid);
                     return back()->withErrors([
-                        "items.{$i}.weight" => "Not enough stock for {$name}. Available: {$avail}g."
+                        "items.{$idx}.weight" => "Not enough stock for {$name}. Available: {$avail}g."
                     ])->withInput();
                 }
             }
@@ -162,7 +191,7 @@ class TransactionsController extends Controller
                 if (empty($item['product_id']) || empty($item['weight'])) continue;
                 if ($item['weight'] <= 0) continue;
 
-                $product = Product::find($item['product_id']);
+                $product = $products[$item['product_id']] ?? null;
                 if (!$product) continue;
 
                 $productNames[] = $product->product_name;
@@ -191,11 +220,11 @@ class TransactionsController extends Controller
         }
 
         // Build description from products + direction + status
-        $directionLabel = $validated['direction'] === 'buying' ? 'Bought from Client' : 'Sold to Client';
+        $directionLabel = $validated['direction'] === 'buying' ? __('messages.desc_bought') : __('messages.desc_sold');
         if (bccomp($remaining, '0', 4) > 0) {
-            $statusLabel = $amountPaid > 0 ? 'Partial Payment' : 'Outstanding Balance';
+            $statusLabel = $amountPaid > 0 ? __('messages.desc_partial') : __('messages.desc_outstanding');
         } else {
-            $statusLabel = 'Settled';
+            $statusLabel = __('messages.desc_settled');
         }
         $productStr = $productNames ? implode(', ', array_slice($productNames, 0, 4)) : '';
         $description = $directionLabel . ($productStr ? ' – ' . $productStr : '') . ' – ' . $statusLabel;
@@ -226,9 +255,9 @@ class TransactionsController extends Controller
 
         $msg = 'Transaction recorded. Total: $' . number_format($totalValue, 2);
         if ($amountPaid > 0) $msg .= ' | Paid now: $' . number_format($amountPaid, 2);
-        if ($remaining > 0) {
+        if (bccomp($remaining, '0', 4) > 0) {
             $who = $validated['direction'] === 'buying' ? 'You owe client' : 'Client owes you';
-            $msg .= ' | Remaining: $' . number_format($remaining, 2) . ' (' . $who . ')';
+            $msg .= ' | Remaining: $' . number_format((float)$remaining, 2) . ' (' . $who . ')';
         }
 
         return redirect()->route('customers.show', $client->id)
@@ -237,9 +266,14 @@ class TransactionsController extends Controller
 
     public function store(Request $request, $customerId)
     {
-        $client = Client::findOrFail($customerId);
-        $type = $request->input('type');
         $user = Auth::user();
+        $storeIds = Store::where('store_user_id', $user->id)->pluck('id');
+
+        $client = Client::whereHas('states', function ($q) use ($storeIds) {
+            $q->whereIn('client_state_store_id', $storeIds);
+        })->findOrFail($customerId);
+
+        $type = $request->input('type');
 
         $store = Store::where('store_user_id', $user->id)
             ->where('store_active', true)

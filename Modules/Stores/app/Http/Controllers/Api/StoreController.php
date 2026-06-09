@@ -3,64 +3,29 @@
 namespace Modules\Stores\app\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Stores\app\Models\Store;
+use Modules\Stores\app\Models\StoreType;
 
 class StoreController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index() { return Store::where('store_user_id', auth()->id())->get(); }
+    public function store(Request $request)
     {
-        $stores = Store::with(['user', 'type'])->paginate($request->query('per_page', 15));
-
-        return response()->json($stores);
+        $data = $request->all();
+        $data['store_user_id'] = auth()->id();
+        return Store::create($data);
     }
+    public function show(Store $store) { return $store; }
+    public function update(Request $request, Store $store) { $store->update($request->all()); return $store; }
+    public function destroy(Store $store) { $store->update(['store_active' => false]); return response()->noContent(); }
+}
 
-    public function store(Request $request): JsonResponse
-    {
-        $data = $request->validate([
-            'store_user_id' => ['required', 'integer', 'min:1'],
-            'store_name' => ['required', 'string', 'max:255'],
-            'store_active' => ['required', 'boolean'],
-            'store_address' => ['sometimes', 'string', 'max:200'],
-            'store_type_id' => ['required', 'integer', 'min:1'],
-            'store_location' => ['required', 'string', 'in:Physical,Online,Both'],
-        ]);
-
-        $data['store_update_date'] = now();
-
-        $store = Store::create($data);
-
-        return response()->json(['data' => $store->load(['user', 'type'])], 201);
-    }
-
-    public function show(Store $store): JsonResponse
-    {
-        return response()->json(['data' => $store->load(['user', 'type'])]);
-    }
-
-    public function update(Request $request, Store $store): JsonResponse
-    {
-        $data = $request->validate([
-            'store_user_id' => ['sometimes', 'integer', 'min:1'],
-            'store_name' => ['sometimes', 'string', 'max:255'],
-            'store_active' => ['sometimes', 'boolean'],
-            'store_address' => ['sometimes', 'string', 'max:200'],
-            'store_type_id' => ['sometimes', 'integer', 'min:1'],
-            'store_location' => ['sometimes', 'string', 'in:Physical,Online,Both'],
-        ]);
-
-        $data['store_update_date'] = now();
-
-        $store->update($data);
-
-        return response()->json(['data' => $store->load(['user', 'type'])]);
-    }
-
-    public function destroy(Store $store): JsonResponse
-    {
-        $store->delete();
-
-        return response()->json(['message' => 'Store deleted successfully.']);
-    }
+class StoreTypeController extends Controller
+{
+    public function index() { return StoreType::all(); }
+    public function store(Request $request) { return StoreType::create($request->all()); }
+    public function show(StoreType $type) { return $type; }
+    public function update(Request $request, StoreType $type) { $type->update($request->all()); return $type; }
+    public function destroy(StoreType $type) { $type->delete(); return response()->noContent(); }
 }

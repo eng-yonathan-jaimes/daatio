@@ -27,25 +27,26 @@ class ResetPasswordController extends Controller
             'password' => ['required', 'confirmed'],
         ]);
 
+        $resetUser = null;
+
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
+            function ($user, $password) use (&$resetUser) {
                 $user->forceFill([
                     'user_password' => Hash::make($password),
                 ])->save();
+                $resetUser = $user;
             }
         );
 
-        $user = User::where('user_email', $request->email)->first();
-
-        if ($user) {
+        if ($resetUser) {
             UserRecoveryHistory::create([
                 'user_recovery_history_intent_date' => now(),
                 'user_recovery_history_recovery_answered' => $status === Password::PASSWORD_RESET ? 'yes' : 'no',
                 'user_recovery_history_recovered_success' => $status === Password::PASSWORD_RESET,
                 'user_recovery_history_method_used' => 'email',
                 'user_recovery_history_ip' => $request->ip(),
-                'user_recovery_history_user_id' => $user->id,
+                'user_recovery_history_user_id' => $resetUser->id,
                 'user_recovery_history_decive' => $request->userAgent() ?? 'unknown',
             ]);
         }

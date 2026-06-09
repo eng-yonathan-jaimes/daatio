@@ -14,9 +14,14 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         $search = $request->input('search');
+        $user = Auth::user();
+        $storeIds = Store::where('store_user_id', $user->id)->pluck('id');
 
         $customers = Client::query()
-            ->where('client_active', true);
+            ->where('client_active', true)
+            ->whereHas('states', function ($q) use ($storeIds) {
+                $q->whereIn('client_state_store_id', $storeIds);
+            });
 
         if ($search) {
             $customers->where(function ($q) use ($search) {
@@ -85,10 +90,21 @@ class CustomerController extends Controller
 
     public function show($id)
     {
-        $client = Client::with(['states', 'transactions' => function ($q) {
-            $q->with('user')->orderBy('transaction_registration_date', 'desc');
-        }, 'orders' => function ($q) {
-            $q->with('items.product')->orderBy('client_order_registration_date', 'desc');
+        $user = Auth::user();
+        $storeIds = Store::where('store_user_id', $user->id)->pluck('id');
+
+        $client = Client::whereHas('states', function ($q) use ($storeIds) {
+            $q->whereIn('client_state_store_id', $storeIds);
+        })->with(['states' => function ($q) use ($storeIds) {
+            $q->whereIn('client_state_store_id', $storeIds);
+        }, 'transactions' => function ($q) use ($storeIds) {
+            $q->whereIn('transaction_store_id', $storeIds)
+                ->with('user')
+                ->orderBy('transaction_registration_date', 'desc');
+        }, 'orders' => function ($q) use ($storeIds) {
+            $q->whereIn('client_order_store_id', $storeIds)
+                ->with('items.product')
+                ->orderBy('client_order_registration_date', 'desc');
         }])->findOrFail($id);
 
         $balance = $client->states->first();

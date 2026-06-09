@@ -3,58 +3,42 @@
 namespace Modules\Clients\app\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Clients\app\Models\ClientState;
 
 class ClientStateController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        $states = ClientState::with(['client', 'store'])->paginate($request->query('per_page', 15));
-
-        return response()->json($states);
+        return ClientState::paginate($request->query('per_page', 50));
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(Request $request)
     {
-        $data = $request->validate([
-            'client_state_client_id' => ['required', 'integer', 'min:1'],
-            'client_state_store_id' => ['required', 'integer', 'min:1'],
-            'client_state_amount' => ['required', 'numeric', 'min:0'],
+        $validated = $request->validate([
+            'client_state_client_id' => ['required', 'exists:client,id'],
+            'client_state_store_id' => ['required', 'exists:store,id'],
+            'client_state_amount' => ['required', 'numeric'],
             'client_state_state' => ['required', 'string', 'in:Favor,Debit,Settled'],
-            'client_state_last_transaction_date' => ['sometimes', 'date'],
         ]);
-
-        $state = ClientState::create($data);
-
-        return response()->json(['data' => $state->load(['client', 'store'])], 201);
+        $validated['client_state_last_transaction_date'] = now();
+        return ClientState::create($validated);
     }
 
-    public function show(ClientState $clientState): JsonResponse
+    public function show(ClientState $state)
     {
-        return response()->json(['data' => $clientState->load(['client', 'store'])]);
+        return $state;
     }
 
-public function update(Request $request, ClientState $clientState): JsonResponse
+    public function update(Request $request, ClientState $state)
     {
-        $data = $request->validate([
-            'client_state_client_id' => ['sometimes', 'integer', 'min:1'],
-            'client_state_store_id' => ['sometimes', 'integer', 'min:1'],
-            'client_state_amount' => ['sometimes', 'numeric', 'min:0'],
-            'client_state_state' => ['sometimes', 'string', 'in:Favor,Debit,Settled'],
-            'client_state_last_transaction_date' => ['sometimes', 'date'],
-        ]);
-
-        $clientState->update($data);
-
-        return response()->json(['data' => $clientState->load(['client', 'store'])]);
+        $state->update($request->all());
+        return $state;
     }
 
-    public function destroy(ClientState $clientState): JsonResponse
+    public function destroy(ClientState $state)
     {
-        $clientState->delete();
-
-        return response()->json(['message' => 'Client state deleted successfully.']);
+        $state->delete();
+        return response()->noContent();
     }
 }
